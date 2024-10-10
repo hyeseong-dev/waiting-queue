@@ -6,8 +6,9 @@
 
 ### 소개
 이 프로젝트는 짧은 시간 동안 대량의 트래픽을 처리할 수 있는 **접속자 대기열 시스템**을 구현하는 것을 목표로 합니다. **Spring WebFlux**, **Redis**, **R2DBC**를 사용하여, 순차적으로 대기열에 들어온 요청을 관리하고, 서버 부하를 줄이기 위해 사용자 접속을 제어합니다.
-
+   
 [접속자대기열시스템#1요구사항.pptx](https://github.com/user-attachments/files/17328071/1.pptx)
+   
 [접속자대기열시스템#2아키텍처.pptx](https://github.com/user-attachments/files/17328074/2.pptx)
 
 ### 주요 기능
@@ -39,7 +40,19 @@ docker run -d -p 6379:6379 redis
 mvn spring-boot:run
 ```
 
+### 세부 구현 문서
+
+#### 
+#### 셋업 https://hyeseong-dev.tistory.com/207
+#### 대기열 등록 API https://hyeseong-dev.tistory.com/206
+#### 웹페이지 진입 API https://hyeseong-dev.tistory.com/208
+#### 접속대기 웹페이지 https://hyeseong-dev.tistory.com/209
+#### 대기열 스케줄러 개발 https://hyeseong-dev.tistory.com/210
+#### 대기열 이탈 https://hyeseong-dev.tistory.com/211
+#### 최종 테스트 API 212
+
 ### 시스템 구성도
+
 #### 사용자 대기 등록 및 순번 조회
 
 ```mermaid
