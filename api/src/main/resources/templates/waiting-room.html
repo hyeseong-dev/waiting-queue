@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>접속 대기 중</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .queue-container {
+            background-color: #fff;
+            width: 300px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+        }
+        .queue-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .queue-subheader {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .queue-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .queue-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .queue-count {
+            font-size: 24px;
+            color: #ff5722;
+            font-weight: bold;
+        }
+        .progress-bar {
+            background-color: #ddd;
+            border-radius: 5px;
+            height: 8px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .progress-fill {
+            background-color: #ff5722;
+            height: 100%;
+            width: 50%;
+            border-radius: 5px;
+        }
+        .queue-warning {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+        }
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="queue-container">
+    <div class="close-button">&times;</div>
+    <div class="queue-header">YES24 티켓</div>
+    <div class="queue-subheader">접속 대기 중입니다.<br>순서가 오면 다음 단계로 넘어갑니다.</div>
+    <div class="queue-info">
+        <p>대기 인원 <span id="number" class="queue-count">0명 이상</span></p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 50%;"></div>
+        </div>
+        <p>예상 대기 시간: <span id="waiting-time">00분 00초</span></p>
+    </div>
+    <div class="queue-warning">
+        ※ 대기 중 새로고침을 하거나 다시 접속하시면<br>대기 시간이 늘어날 수 있으니 유의해 주세요.
+    </div>
+</div>
+<script>
+    function fetchWaitingRank() {
+        const queue = `[[${queue}]]`;
+        const userId = `[[${userId}]]`;
+        const queryParam = new URLSearchParams({queue: queue, user_id: userId});
+
+        fetch('/api/v1/queue/rank?' + queryParam)
+            .then(response => response.json())
+            .then(data => {
+                const numberElement = document.querySelector('#number');
+                const timeElement = document.querySelector('#waiting-time');
+
+                if (data.rank < 0) {
+                    fetch('/api/v1/queue/touch?' + queryParam)
+                        .then(() => {
+                            // 페이지 새로고침
+                            window.location.reload();
+                        })
+                        .catch(error => console.error(error));
+                    return;
+                }
+
+                // 대기 인원 업데이트
+                if (numberElement) {
+                    numberElement.innerHTML = data.rank + '명 이상';
+                }
+
+                // 예상 대기 시간 업데이트
+                if (timeElement) {
+                    timeElement.innerHTML = calculateEstimatedTime(data.rank);
+                }
+            })
+            .catch(error => console.error(error));
+    }
+
+    function calculateEstimatedTime(rank) {
+        // 대기열에서 10초마다 100명씩 제거
+        const removalRatePerSecond = 100 / 10;
+        const estimatedTimeInSeconds = rank / removalRatePerSecond;
+
+        const minutes = Math.floor(estimatedTimeInSeconds / 60);
+        const seconds = Math.floor(estimatedTimeInSeconds % 60);
+        return `${minutes}분 ${seconds < 10 ? '0' : ''}${seconds}초`;
+    }
+
+    setInterval(fetchWaitingRank, 3000);
+</script>
+</body>
+</html>
