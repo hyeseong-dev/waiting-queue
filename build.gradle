@@ -71,3 +71,7 @@ project(":website") {
     bootJar { enabled = true }
     jar { enabled = false }
 }
+
+tasks.register('bootRunAll') {
+    dependsOn(':api:bootRun', ':website:bootRun')
+}
